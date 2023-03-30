@@ -131,7 +131,7 @@ const logout = () => {
                             </div>
 
                             <!-- Settings Dropdown -->
-                            <div class="ml-3 relative">
+                            <div class="ml-3 relative flex items-center">
                                 <!-- Cart -->
                                 <Link
                                     :href="route('cart.index')"

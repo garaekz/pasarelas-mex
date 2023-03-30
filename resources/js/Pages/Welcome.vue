@@ -4,6 +4,10 @@ import AppLayout from '../Layouts/AppLayout.vue';
 
 defineProps({
     products: {},
+    success: {
+        type: String,
+        default: null,
+    },
 });
 
 const form = useForm({

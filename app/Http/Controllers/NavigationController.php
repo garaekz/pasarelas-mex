@@ -8,10 +8,14 @@ use Inertia\Inertia;
 
 class NavigationController extends Controller
 {
-    public function welcome()
+    public function welcome(Request $request)
     {
-        return Inertia::render('Welcome', [
+        $response = [
             'products' => Product::all(),
-        ]);
+        ];
+        if ($request->has('success')) {
+            $response['success'] = $request->success;
+        }
+        return Inertia::render('Welcome', $response);
     }
 }

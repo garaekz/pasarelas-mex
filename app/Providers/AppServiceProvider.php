@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\ConektaRepositoryInterface;
+use App\Contracts\OpenpayRepositoryInterface;
+use App\Contracts\PaymentUserRepositoryInterface;
+use App\Repositories\ConektaRepository;
+use App\Repositories\OpenpayRepository;
+use App\Repositories\PaymentUserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(ConektaRepositoryInterface::class, ConektaRepository::class);
+        $this->app->bind(OpenpayRepositoryInterface::class, OpenpayRepository::class);
+        $this->app->bind(PaymentUserRepositoryInterface::class, PaymentUserRepository::class);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddCartRequest;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -38,14 +40,9 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request)
+    public function add(AddCartRequest $request)
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-        ]);
-
-        $product = \App\Models\Product::find($request->product_id);
-
+        $product = Product::find($request->product_id);
         $cart = $request->session()->get('cart', []);
 
         if (isset($cart[$product->id])) {
