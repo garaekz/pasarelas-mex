@@ -12,6 +12,10 @@ class ProfileInformationTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
+        // Skipped because we disabled Jetstream routes
+        $this->markTestSkipped('See profile is not enabled.');
+        return;
+
         $this->actingAs($user = User::factory()->create());
 
         $response = $this->put('/user/profile-information', [

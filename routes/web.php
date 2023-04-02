@@ -22,6 +22,7 @@ Route::get('/', [NavigationController::class, 'welcome'])->name('welcome');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
+Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::middleware([
     'auth:sanctum',
@@ -29,11 +30,9 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order:public_id}', [OrderController::class, 'show'])
         ->middleware('can:view,order')
         ->name('orders.show');
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
 });

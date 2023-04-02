@@ -5,7 +5,7 @@ use App\Models\PaymentUser;
 use App\Models\User;
 use App\Services\OrderService;
 
-test('it can show the order to the owner', function () {
+test('it can show a single order to the owner', function () {
     $user = User::factory()->create();
     $order = Order::factory()->create([
         'user_id' => $user->id,
@@ -19,7 +19,7 @@ test('it can show the order to the owner', function () {
         );
 });
 
-test('it cannot show the order to a non-owner', function () {
+test('it cannot show an order to a non-owner', function () {
     $user = User::factory()->create();
     $order = Order::factory()->create();
 
@@ -28,7 +28,7 @@ test('it cannot show the order to a non-owner', function () {
         ->assertForbidden();
 });
 
-test('it cannot show the order to a guest', function () {
+test('it cannot show an order to a guest', function () {
     $order = Order::factory()->create();
 
     $this->get('/orders/' . $order->public_id)
@@ -106,4 +106,23 @@ test('it clears the session after placing order', function () {
     $this->post('/orders', [
         'payment_method' => 'bank_account',
     ])->assertSessionMissing('cart');
+});
+
+test('it can show the orders list to the owner', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->create([
+        'user_id' => $user->id,
+    ]);
+
+    $this->actingAs($user, "web");
+    $this->get('/orders')
+        ->assertInertia(fn ($page) => $page
+            ->component('OrderList')
+            ->has('orders')
+        );
+});
+
+test('it cannot show an order list to a guest', function () {
+    $this->get('/orders')
+        ->assertRedirect('/login');
 });

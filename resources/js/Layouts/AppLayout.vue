@@ -42,7 +42,7 @@ const logout = () => {
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route('welcome')">
                                 <ApplicationMark class="block h-9 w-auto" />
                                 </Link>
                             </div>
@@ -52,9 +52,9 @@ const logout = () => {
                                 <NavLink :href="route('welcome')" :active="route().current('welcome')">
                                     Inicio
                                 </NavLink>
-                                <NavLink v-if="$page.props.auth.user" :href="route('dashboard')"
-                                    :active="route().current('dashboard')">
-                                    Dashboard
+                                <NavLink v-if="$page.props.auth.user" :href="route('orders.index')"
+                                    :active="route().current('orders.index')">
+                                    Ordenes
                                 </NavLink>
                             </div>
                         </div>
@@ -133,21 +133,23 @@ const logout = () => {
                             <!-- Settings Dropdown -->
                             <div class="ml-3 relative flex items-center">
                                 <!-- Cart -->
-                                <Link
-                                    :href="route('cart.index')"
-                                    class="relative inline-flex items-center justify-center p-3 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out"
-                                    @click="showingCart = !showingCart">
-                                    <v-icon name="fa-shopping-cart" class="h-6 w-6" />
-                                    <span
-                                        class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
-                                        v-if="$page.props.cartCount > 0">
-                                        {{ $page.props.cartCount }}
-                                    </span>
+                                <Link v-if="$page.props.cartCount" :href="route('cart.index')"
+                                    class="relative inline-flex items-center justify-center p-3 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                                <v-icon name="fa-shopping-cart" class="h-6 w-6" />
+                                <span
+                                    class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
+                                    v-if="$page.props.cartCount > 0">
+                                    {{ $page.props.cartCount }}
+                                </span>
                                 </Link>
+                                <button v-else disabled
+                                    class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 transition duration-150 ease-in-out">
+                                    <v-icon name="fa-shopping-cart" class="h-6 w-6" />
+                                </button>
                                 <Dropdown v-if="$page.props.auth.user" align="right" width="48">
                                     <template #trigger>
-                                        <button v-if="$page.props.jetstream.managesProfilePhotos"
-                                            class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                                    <button v-if="$page.props.jetstream.managesProfilePhotos"
+                                        class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
                                             <img class="h-8 w-8 rounded-full object-cover"
                                                 :src="$page.props.auth.user.profile_photo_url"
                                                 :alt="$page.props.auth.user.name">
@@ -171,12 +173,12 @@ const logout = () => {
                                     <template #content>
                                         <!-- Account Management -->
                                         <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Manage Account
+                                            Actions
                                         </div>
 
-                                        <DropdownLink :href="route('profile.show')">
-                                            Profile
-                                        </DropdownLink>
+                                        <!-- <DropdownLink :href="route('profile.show')">
+                                                Profile
+                                            </DropdownLink> -->
 
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures"
                                             :href="route('api-tokens.index')">
@@ -199,17 +201,19 @@ const logout = () => {
 
                         <div class="-mr-2 flex items-center gap-2 sm:hidden">
                             <!-- Cart -->
-                            <Link
-                                :href="route('cart.index')"
-                                class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out"
-                                @click="showingCart = !showingCart">
-                                <v-icon name="fa-shopping-cart" class="h-6 w-6" />
-                                <span
-                                    class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
-                                    v-if="$page.props.cartCount">
-                                    {{ $page.props.cartCount }}
-                                </span>
+                            <Link v-if="$page.props.cartCount" :href="route('cart.index')"
+                                class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                            <v-icon name="fa-shopping-cart" class="h-6 w-6" />
+                            <span
+                                class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
+                                v-if="$page.props.cartCount">
+                                {{ $page.props.cartCount }}
+                            </span>
                             </Link>
+                            <button v-else disabled
+                                class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 transition duration-150 ease-in-out">
+                                <v-icon name="fa-shopping-cart" class="h-6 w-6" />
+                            </button>
                             <!-- Hamburger -->
                             <button
                                 class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out"
@@ -230,14 +234,15 @@ const logout = () => {
                 </div>
 
                 <!-- Responsive Navigation Menu -->
-                <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }" class="sm:hidden">
+                <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
+                    class="sm:hidden">
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('welcome')" :active="route().current('welcome')">
-                            Inicio
+                    <ResponsiveNavLink :href="route('welcome')" :active="route().current('welcome')">
+                        Inicio
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user" :href="route('dashboard')"
-                            :active="route().current('dashboard')">
-                            Dashboard
+                        <ResponsiveNavLink v-if="$page.props.auth.user" :href="route('orders.index')"
+                            :active="route().current('orders.index')">
+                            Ordenes
                         </ResponsiveNavLink>
                     </div>
 
@@ -260,9 +265,9 @@ const logout = () => {
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                Profile
-                            </ResponsiveNavLink>
+                            <!-- <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
+                                    Profile
+                                </ResponsiveNavLink> -->
 
                             <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')"
                                 :active="route().current('api-tokens.index')">
@@ -310,30 +315,31 @@ const logout = () => {
                                                     class="mr-2 h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg"
                                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                     stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <div>{{ team.name }}</div>
-                                        </div>
-                                    </ResponsiveNavLink>
-                                </form>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <div>{{ team.name }}</div>
+                                            </div>
+                                        </ResponsiveNavLink>
+                                    </form>
+                                </template>
                             </template>
-                        </template>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <!-- Page Heading -->
-        <header v-if="$slots.header" class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                <slot name="header" />
-            </div>
-        </header>
+            <!-- Page Heading -->
+            <header v-if="$slots.header" class="bg-white dark:bg-gray-800 shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <slot name="header" />
+                </div>
+            </header>
 
-        <!-- Page Content -->
-        <main>
-            <slot />
-        </main>
+            <!-- Page Content -->
+            <main>
+                <slot />
+            </main>
+        </div>
     </div>
-</div></template>
+</template>

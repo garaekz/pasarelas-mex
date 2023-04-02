@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { computed, onMounted, toRef, watch } from 'vue';
 
 const props = defineProps({
@@ -10,6 +10,10 @@ const props = defineProps({
     tax: 0,
     total: 0,
 });
+
+const removeFromCart = (id) => {
+    router.delete(route('cart.remove', id));
+};
 
 </script>
 
@@ -23,7 +27,7 @@ const props = defineProps({
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="flex flex-col sm:flex-row gap-4 items-start">
+                <div v-if="$page.props.cartCount" class="flex flex-col sm:flex-row gap-4 items-start">
                     <div class="w-full sm:w-2/3 bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-8">
                         <div class="flex flex-col">
                             <div class="flex flex-col">
@@ -32,7 +36,7 @@ const props = defineProps({
                                     <span class="text-gray-500 dark:text-gray-400 font-medium text-lg">Cantidad</span>
                                     <span class="text-gray-500 dark:text-gray-400 font-medium text-lg">Precio</span>
                                 </div>
-                                <div v-for="item in cart" :key="item.id" class="flex flex-row justify-between">
+                                <div v-for="item in cart" :key="item.id" class="flex flex-row justify-between items-center">
                                     <div class="flex py-2">
                                         <div class="w-[110px]">
                                             <img :src="item.image" class="h-full w-auto">
@@ -44,6 +48,10 @@ const props = defineProps({
                                     </div>
                                     <span class="text-gray-800 dark:text-white">{{ item.quantity }}</span>
                                     <span class="text-gray-800 dark:text-white">${{ item.price * item.quantity }}</span>
+                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
+                                        @click="removeFromCart(item.id)">
+                                        Eliminar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -79,6 +87,11 @@ const props = defineProps({
                             </div>
                         </div>
                     </div>
+                </div>
+                <div v-else class="flex justify-center text-center w-full bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-16">
+                    <h1 class="text-2xl md:text-4xl font-semibold text-gray-800 dark:text-white">
+                        No hay productos en el carrito
+                    </h1>
                 </div>
             </div>
         </div>

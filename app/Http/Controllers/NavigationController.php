@@ -11,7 +11,7 @@ class NavigationController extends Controller
     public function welcome(Request $request)
     {
         $response = [
-            'products' => Product::all(),
+            'products' => Product::paginate(9),
         ];
         if ($request->has('success')) {
             $response['success'] = $request->success;

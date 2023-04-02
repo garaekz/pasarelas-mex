@@ -111,3 +111,15 @@ test('it returns a cart count on every request', function () {
                 ->where('cartCount', 1)
             );
 });
+
+it('it can remove product from cart', function () {
+    $product = Product::factory()->create();
+
+    $this->post('/cart', [
+        'product_id' => $product->id,
+    ]);
+
+    $this->delete('/cart/' . $product->id)
+        ->assertRedirect('/cart')
+        ->assertSessionMissing('cart.' . $product->id);
+});

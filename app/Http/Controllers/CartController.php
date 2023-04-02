@@ -61,4 +61,17 @@ class CartController extends Controller
 
         return redirect()->route('welcome');
     }
+
+    public function remove(Request $request, $id)
+    {
+        $cart = $request->session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+        }
+
+        $request->session()->put('cart', $cart);
+
+        return redirect()->route('cart.index');
+    }
 }

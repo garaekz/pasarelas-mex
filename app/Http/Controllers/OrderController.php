@@ -26,7 +26,15 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::with('products')
+            ->withCount('products')
+            ->where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return Inertia::render('OrderList', [
+            'orders' => $orders,
+        ]);
     }
 
     /**

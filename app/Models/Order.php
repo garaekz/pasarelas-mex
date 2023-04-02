@@ -23,6 +23,18 @@ class Order extends Model
         'total',
     ];
 
+    // Format dates as I want
+    protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
+
+    // Format created at as DD/MM/YYYY HH:MM:SS
+    public function getCreatedAtAttribute($value)
+    {
+        return date('d/m/Y H:i:s', strtotime($value));
+    }
+
     public function uniqueIds()
     {
         return [
