@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Services\OrderService;
 use App\Services\PaymentUserService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -33,48 +34,25 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $cart = $request->session()->get('cart', []);
-        $subtotal = array_sum(array_map(function ($item) {
-            return $item['price'] * $item['quantity'];
-        }, $cart));
-        $subtotal = round($subtotal, 2);
-        $tax = round($subtotal * 0.16, 2);
-        $shipping = 9.99;
-        $total = round($subtotal + $tax + $shipping, 2);
+        try {
+            $user = $request->user();
+            $cart = $request->session()->get('cart');
 
-        $paymentUser = $this->paymentUserService->getOrCreate($request->user());
-        $method = $request->payment_method;
-        $payment_gateway = $method === 'oxxo' ? 'conekta' : 'openpay';
+            if (empty($cart)) {
+                return redirect()->back()->withError('No hay productos en el carrito');
+            }
 
-        $order = Order::make([
-            'public_id' => strtolower((string) Str::ulid()),
-            'user_id' => $request->user()->id,
-            'subtotal' => $subtotal,
-            'tax' => $tax,
-            'shipping' => $shipping,
-            'total' => $total,
-            'payment_method' => $method,
-            'payment_gateway' => $payment_gateway,
-        ]);
+            $paymentUser = $this->paymentUserService->getOrCreate($user);
+            $order = $this->orderService->create($user, $paymentUser, $cart, $request->payment_method);
 
-        // Charge the payment method
-        $payment = $this->orderService->charge($order, $paymentUser);
-        $order->payment_id = $payment->id;
-        $order->save();
+            // Clear the cart from session as the order has been created
+            $request->session()->forget('cart');
 
-        $cartProducts = array_map(function ($item) {
-            return [
-                'product_id' => $item['id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price']
-            ];
-        }, $cart);
-
-        $order->products()->sync($cartProducts);
-
-        $request->session()->forget('cart');
-
-        return redirect()->route('orders.show', $order);
+            return redirect()->route('orders.show', $order->public_id);
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return redirect()->back()->with('error', $th->getMessage());
+        }
     }
 
     /**

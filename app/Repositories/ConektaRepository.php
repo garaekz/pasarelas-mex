@@ -3,10 +3,9 @@
 namespace App\Repositories;
 
 use App\Contracts\ConektaRepositoryInterface;
-use Conekta\Charge;
-use Openpay\Data\Openpay;
 use Conekta\Conekta;
 use Conekta\Customer;
+use Conekta\Order as ConektaOrder;
 
 class ConektaRepository implements ConektaRepositoryInterface
 {
@@ -25,8 +24,8 @@ class ConektaRepository implements ConektaRepositoryInterface
         return Customer::find($id);
     }
 
-    public function makeCharge(array $data, $customer = null): Charge
+    public function makeCharge(array $data, $customer = null): ConektaOrder
     {
-        return Charge::create($data);
+        return ConektaOrder::create($data);
     }
 }

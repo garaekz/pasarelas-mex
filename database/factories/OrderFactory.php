@@ -26,6 +26,7 @@ class OrderFactory extends Factory
             'payment_method' => $this->faker->word,
             'payment_gateway' => $this->faker->word,
             'payment_id' => $this->faker->word,
+            'user_id' => \App\Models\User::factory(),
         ];
     }
 }

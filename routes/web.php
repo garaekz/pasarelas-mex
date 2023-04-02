@@ -30,7 +30,9 @@ Route::middleware([
 ])->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/orders/{order:public_id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order:public_id}', [OrderController::class, 'show'])
+        ->middleware('can:view,order')
+        ->name('orders.show');
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');

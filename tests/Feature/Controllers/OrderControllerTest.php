@@ -1,58 +1,109 @@
 <?php
 
-namespace Tests\Feature\Controllers;
-
 use App\Models\Order;
 use App\Models\PaymentUser;
 use App\Models\User;
-use Conekta\Charge;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Openpay\Resources\OpenpayCharge;
-use Tests\TestCase;
+use App\Services\OrderService;
 
-class OrderControllerTest extends TestCase
-{
-    use RefreshDatabase, WithFaker;
+test('it can show the order to the owner', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->create([
+        'user_id' => $user->id,
+    ]);
 
-    /**
-     * Test it can create an order.
-     */
-    public function test_it_can_create_an_order()
-    {
-        $user = User::factory()->create();
-        $this->mock(\App\Services\OrderService::class, function ($mock) use ($user) {
-            $mock->shouldReceive('charge')->once()->andReturn(new Charge('charge_id'));
-        });
-        $this->mock(\App\Services\PaymentUserService::class, function ($mock) use ($user) {
-            $mock->shouldReceive('getOrCreate')->once()->andReturn(PaymentUser::factory()->create([
-                'user_id' => $user->id,
-                'openpay_id' => 'openpay_id',
-                'conekta_id' => 'conekta_id',
-            ]));
-        });
+    $this->actingAs($user, "web");
+    $this->get('/orders/' . $order->public_id)
+        ->assertInertia(fn ($page) => $page
+            ->component('Order')
+            ->has('order')
+        );
+});
 
-        $this->actingAs($user, "web");
-        $this->post('/orders', [
-            'payment_method' => 'bank_account',
-        ])->assertRedirectContains('/orders/');
-    }
+test('it cannot show the order to a non-owner', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->create();
 
-    /**
-     * Test it can show an order.
-     */
-    public function test_it_can_show_an_order()
-    {
-        $user = User::factory()->create();
-        $order = Order::factory()->create([
+    $this->actingAs($user, "web");
+    $this->get('/orders/' . $order->public_id)
+        ->assertForbidden();
+});
+
+test('it cannot show the order to a guest', function () {
+    $order = Order::factory()->create();
+
+    $this->get('/orders/' . $order->public_id)
+        ->assertRedirect('/login');
+});
+
+test('it can create an order', function () {
+    $user = User::factory()->create();
+    $this->mock(OrderService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('create')->once()->andReturn(Order::factory()->create([
             'user_id' => $user->id,
-        ]);
+        ]));
+    });
+    $this->mock(\App\Services\PaymentUserService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('getOrCreate')->once()->andReturn(PaymentUser::factory()->create([
+            'user_id' => $user->id,
+            'openpay_id' => 'openpay_id',
+            'conekta_id' => 'conekta_id',
+        ]));
+    });
 
-        $this->actingAs($user, "web");
-        $this->get('/orders/' . $order->public_id)
-            ->assertInertia(fn ($page) => $page
-                ->component('Order')
-                ->has('order')
-            );
-    }
-}
+    $this->actingAs($user, "web");
+    $this->withSession(['cart' => [
+        [
+            'id' => 1,
+            'name' => 'Product 1',
+            'price' => 100,
+            'quantity' => 3,
+        ],
+        [
+            'id' => 2,
+            'name' => 'Product 2',
+            'price' => 25.85,
+            'quantity' => 2,
+        ]
+    ]]);
+    $this->post('/orders', [
+        'payment_method' => 'bank_account',
+    ])->assertRedirectContains('/orders/');
+    $this->assertDatabaseHas('orders', [
+        'user_id' => $user->id,
+    ]);
+});
+
+test('it clears the session after placing order', function () {
+    $user = User::factory()->create();
+    $this->mock(OrderService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('create')->once()->andReturn(Order::factory()->create([
+            'user_id' => $user->id,
+        ]));
+    });
+    $this->mock(\App\Services\PaymentUserService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('getOrCreate')->once()->andReturn(PaymentUser::factory()->create([
+            'user_id' => $user->id,
+            'openpay_id' => 'openpay_id',
+            'conekta_id' => 'conekta_id',
+        ]));
+    });
+
+    $this->actingAs($user, "web");
+    $this->withSession(['cart' => [
+        [
+            'id' => 1,
+            'name' => 'Product 1',
+            'price' => 100,
+            'quantity' => 3,
+        ],
+        [
+            'id' => 2,
+            'name' => 'Product 2',
+            'price' => 25.85,
+            'quantity' => 2,
+        ]
+    ]]);
+    $this->post('/orders', [
+        'payment_method' => 'bank_account',
+    ])->assertSessionMissing('cart');
+});
