@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Order;
-use App\Models\PaymentUser;
+use App\Models\GatewayCustomer;
 use App\Models\User;
 use App\Services\OrderService;
 
@@ -42,8 +42,8 @@ test('it can create an order', function () {
             'user_id' => $user->id,
         ]));
     });
-    $this->mock(\App\Services\PaymentUserService::class, function ($mock) use ($user) {
-        $mock->shouldReceive('getOrCreate')->once()->andReturn(PaymentUser::factory()->create([
+    $this->mock(\App\Services\GatewayCustomerService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('getOrCreate')->once()->andReturn(GatewayCustomer::factory()->create([
             'user_id' => $user->id,
             'openpay_id' => 'openpay_id',
             'conekta_id' => 'conekta_id',
@@ -80,8 +80,8 @@ test('it clears the session after placing order', function () {
             'user_id' => $user->id,
         ]));
     });
-    $this->mock(\App\Services\PaymentUserService::class, function ($mock) use ($user) {
-        $mock->shouldReceive('getOrCreate')->once()->andReturn(PaymentUser::factory()->create([
+    $this->mock(\App\Services\GatewayCustomerService::class, function ($mock) use ($user) {
+        $mock->shouldReceive('getOrCreate')->once()->andReturn(GatewayCustomer::factory()->create([
             'user_id' => $user->id,
             'openpay_id' => 'openpay_id',
             'conekta_id' => 'conekta_id',

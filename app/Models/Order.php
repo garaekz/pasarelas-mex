@@ -23,16 +23,70 @@ class Order extends Model
         'total',
     ];
 
-    // Format dates as I want
+    protected $appends = [
+        'payment_method_formatted',
+    ];
+
     protected $dates = [
         'created_at',
         'updated_at',
     ];
 
-    // Format created at as DD/MM/YYYY HH:MM:SS
     public function getCreatedAtAttribute($value)
     {
-        return date('d/m/Y H:i:s', strtotime($value));
+        return date('d/m/Y H:i:s a', strtotime($value));
+    }
+
+    public function getPaymentMethodFormattedAttribute()
+    {
+        $value = $this->payment_method;
+        if ($value == 'bank_account') {
+            return 'Transferencia bancaria';
+        }
+
+        if ($value == 'card') {
+            return 'Tarjeta de crédito';
+        }
+
+        if ($value == 'oxxo') {
+            return 'Pago en OXXO';
+        }
+
+        return $value;
+    }
+
+    public function getStatusAttribute($value)
+    {
+        if ($value == 'pending') {
+            return 'Pendiente';
+        }
+
+        if ($value == 'paid') {
+            return 'Pagado';
+        }
+
+        if ($value == 'expired') {
+            return 'Expirado';
+        }
+
+        if ($value == 'cancelled') {
+            return 'Cancelado';
+        }
+
+        if ($value == 'refunded') {
+            return 'Reembolsado';
+        }
+
+        return $value;
+    }
+
+    public function getPdfUrlAttribute()
+    {
+        if ($this->payment_method == 'bank_account') {
+            return env('OPENPAY_BASE_SPEI_URL') . env('OPENPAY_ID') . '/' . $this->payment_id;
+        }
+
+        return null;
     }
 
     public function uniqueIds()

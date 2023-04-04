@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PaymentUser extends Model
+class GatewayCustomer extends Model
 {
     use HasFactory;
 
@@ -15,8 +15,8 @@ class PaymentUser extends Model
 
     protected $fillable = [
         'user_id',
-        'openpay_id',
-        'conekta_id',
+        'customer_id',
+        'gateway',
     ];
 
     public function user()

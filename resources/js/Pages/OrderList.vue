@@ -46,10 +46,8 @@ const props = defineProps({
                                 <thead
                                     class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
                                     <tr class="text-left">
-                                        <th class="px-4 py-2">
-                                            ID
-                                        </th>
                                         <th class="px-4 py-2">Fecha</th>
+                                        <th class="px-4 py-2">Metodo de pago</th>
                                         <th class="px-4 py-2 text-center">Productos</th>
                                         <th class="px-4 py-2">Estado</th>
                                         <th class="px-4 py-2 text-center">Total</th>
@@ -59,10 +57,8 @@ const props = defineProps({
                                 <tbody class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200">
                                     <tr v-for="order in orders.data" :key="order.id"
                                         class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-4 py-2 font-bold">
-                                            {{ order.public_id }}
-                                        </td>
                                         <td class="px-4 py-2">{{ order.created_at }}</td>
+                                        <td class="px-4 py-2">{{ order.payment_method_formatted }}</td>
                                         <td class="px-4 py-2 text-center">
                                             {{ order.products_count }}
                                         </td>

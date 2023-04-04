@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddCartRequest;
 use App\Models\Product;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CartController extends Controller
 {
+    public function __construct(
+        private OrderService $orderService,
+    )
+    {}
     public function index()
     {
         $cart = session()->get('cart', []);
@@ -33,6 +38,12 @@ class CartController extends Controller
         }, $cart));
 
         return Inertia::render('Checkout', [
+            'stripe_key' => env('STRIPE_PK'),
+            'stripe_intent' => $this->orderService->createStripeIntent([
+                'amount' => round($subtotal * 1.16 + 9.99, 2) * 100,
+                'currency' => 'mxn',
+                'user' => auth()->user(),
+            ]),
             'subtotal' => round($subtotal, 2),
             'tax' => round($subtotal * 0.16, 2),
             'shipping' => 9.99,

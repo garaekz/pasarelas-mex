@@ -9,10 +9,11 @@ import { OhVueIcon, addIcons } from "oh-vue-icons";
 import {
     BiCircle,
     BiCheck2Circle,
-    FaShoppingCart
+    FaShoppingCart,
+    RiLoader5Fill
  } from "oh-vue-icons/icons";
 
-addIcons(BiCircle, BiCheck2Circle, FaShoppingCart);
+addIcons(BiCircle, BiCheck2Circle, FaShoppingCart, RiLoader5Fill);
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 

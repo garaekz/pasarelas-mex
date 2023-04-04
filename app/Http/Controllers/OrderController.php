@@ -6,7 +6,7 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Services\OrderService;
-use App\Services\PaymentUserService;
+use App\Services\GatewayCustomerService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -15,11 +15,11 @@ class OrderController extends Controller
 {
     public function __construct(
         private OrderService $orderService,
-        private PaymentUserService $paymentUserService,
+        private GatewayCustomerService $gatewayCustomerService,
     )
     {
         $this->orderService = $orderService;
-        $this->paymentUserService = $paymentUserService;
+        $this->gatewayCustomerService = $gatewayCustomerService;
     }
     /**
      * Display a listing of the resource.
@@ -50,8 +50,7 @@ class OrderController extends Controller
                 return redirect()->back()->withError('No hay productos en el carrito');
             }
 
-            $paymentUser = $this->paymentUserService->getOrCreate($user);
-            $order = $this->orderService->create($user, $paymentUser, $cart, $request->payment_method);
+            $order = $this->orderService->create($user, $cart, $request->payment_method);
 
             // Clear the cart from session as the order has been created
             $request->session()->forget('cart');

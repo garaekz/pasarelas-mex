@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_users', function (Blueprint $table) {
+        Schema::create('gateway_customers', function (Blueprint $table) {
+            $table->string('gateway');
+            $table->string('customer_id');
             $table->foreignIdFor(User::class)->constrained();
-            $table->string('openpay_id');
-            $table->string('conekta_id');
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_users');
+        Schema::dropIfExists('gateway_customers');
     }
 };

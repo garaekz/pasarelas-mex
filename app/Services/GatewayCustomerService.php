@@ -4,15 +4,15 @@ namespace App\Services;
 
 use App\Contracts\ConektaRepositoryInterface;
 use App\Contracts\OpenpayRepositoryInterface;
-use App\Contracts\PaymentUserRepositoryInterface;
-use App\Models\PaymentUser;
+use App\Contracts\GatewayCustomerRepositoryInterface;
+use App\Models\GatewayCustomer;
 use App\Models\User;
 
-class PaymentUserService
+class GatewayCustomerService
 {
   public function __construct(
     private ConektaRepositoryInterface $conektaRepository,
-    private PaymentUserRepositoryInterface $repository,
+    private GatewayCustomerRepositoryInterface $repository,
     private OpenpayRepositoryInterface $openpayRepository,
   ) {
     $this->repository = $repository;
@@ -20,10 +20,10 @@ class PaymentUserService
     $this->openpayRepository = $openpayRepository;
   }
 
-  public function getOrCreate(User $user): PaymentUser
+  public function getOrCreate(User $user): GatewayCustomer
   {
-    $paymentUser = $this->repository->findOne($user->id);
-    if (!$paymentUser) {
+    $gatewayCustomer = $this->repository->findOne($user->id);
+    if (!$gatewayCustomer) {
       $openpayUser = $this->openpayRepository->createCustomer([
         'name' => $user->name,
         'email' => $user->email,
@@ -32,13 +32,13 @@ class PaymentUserService
         'name' => $user->name,
         'email' => $user->email,
       ]);
-      $paymentUser = $this->repository->create([
+      $gatewayCustomer = $this->repository->create([
         'user_id' => $user->id,
         'openpay_id' => $openpayUser->id,
         'conekta_id' => $conektaUser->id,
       ]);
     }
 
-    return $paymentUser;
+    return $gatewayCustomer;
   }
 }

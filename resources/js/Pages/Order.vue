@@ -6,27 +6,15 @@ const props = defineProps({
     order: {},
 });
 
-const parseStatus = (status) => {
-    switch (status) {
-        case 'pending':
-            return 'Pendiente de pago';
-        case 'paid':
-            return 'Pagada';
-        case 'canceled':
-            return 'Cancelada';
-        case 'refunded':
-            return 'Reembolsada';
-        case 'failed':
-            return 'Fallida';
-        case 'shipped':
-            return 'Enviada';
-        case 'delivered':
-            return 'Entregada';
-        case 'completed':
-            return 'Completada';
-        default:
-            return 'Error, contacta al administrador';
+const splitByHyphens = (string) => {
+    let formatted = '';
+    for (let i = 0; i < string.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+            formatted += '-';
+        }
+        formatted += string.charAt(i);
     }
+    return formatted;
 };
 </script>
 
@@ -49,10 +37,41 @@ const parseStatus = (status) => {
                             <p class="text-gray-500 dark:text-gray-400">
                                 Tu orden ha sido recibida y está siendo procesada.
                             </p>
-                            <!-- Show status -->
                             <div class="flex gap-2 mt-4">
                                 <span class="text-gray-500 dark:text-gray-400">Estado:</span>
-                                <span class="text-gray-800 dark:text-white">{{ parseStatus(order.status) }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ order.status }}</span>
+                            </div>
+                            <div class="flex gap-2 mt-4" v-if="order.pdf_url">
+                                <span class="text-gray-500 dark:text-gray-400">Hoja de pago:</span>
+                                <a :href="order.pdf_url" target="_blank"
+                                    class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-500">Descargar</a>
+                            </div>
+                            <div class="flex flex-col gap-2 mt-4" v-if="order.payment_method === 'oxxo'">
+                                <h4 class="text-gray-800 dark:text-white font-semibold text-xl">
+                                    Instrucciones de pago
+                                </h4>
+                                <p class="text-gray-500 dark:text-gray-400">
+                                    Paga en cualquier tienda OXXO, y usa el siguiente código para realizar el pago:
+                                </p>
+                                <p class=" flex justify-center text-gray-800 dark:text-white font-semibold text-2xl">
+                                    {{ splitByHyphens(order.reference) }}
+                                </p>
+                                <ol class="list-decimal list-inside text-gray-500 dark:text-gray-400">
+                                    <li>Acude a la tienda OXXO más cercana.</li>
+                                    <li>Indica en caja que quieres realizar un pago de servicio.</li>
+                                    <li>Dicta al cajero el número de referencia en esta ficha para que tecleé directamete en la
+                                        pantalla de venta.</li>
+                                    <li>Realiza el pago correspondiente con dinero en efectivo.</li>
+                                    <li>Al confirmar tu pago, el cajero te entregará un comprobante impreso. <strong>En el podrás
+                                        verificar que se haya realizado correctamente.</strong> Conserva este comprobante de pago.</li>
+                                </ol>
+                                <p class="text-gray-500 dark:text-gray-400">
+                                    Al completar el proceso, recibirás un correo electrónico con la confirmación de tu pago. Podrás regresar a esta pantalla y notarás que el estatus de tu orden ha cambiado a <strong>Pagado</strong>.
+                                </p>
+
+                                <p class="bg-red-400 border border-red-600 text-red-800 rounded p-4 mt-8">
+                                    <strong>Importante:</strong> Recuerda que todo este sitio es de prueba, por lo que no se realizará ningún cobro, no es necesario que realices ningún pago y no se enviará ningún producto.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -78,9 +97,10 @@ const parseStatus = (status) => {
                                 <span class="text-gray-800 dark:text-white font-semibold text-xl">Total</span>
                                 <span class="text-gray-800 dark:text-white font-semibold text-xl">$ {{ order.total }}</span>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</AppLayout></template>
+    </AppLayout>
+</template>
