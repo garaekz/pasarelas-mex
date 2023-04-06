@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Services\OrderService;
-use App\Services\GatewayCustomerService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -15,12 +14,11 @@ class OrderController extends Controller
 {
     public function __construct(
         private OrderService $orderService,
-        private GatewayCustomerService $gatewayCustomerService,
     )
     {
         $this->orderService = $orderService;
-        $this->gatewayCustomerService = $gatewayCustomerService;
     }
+
     /**
      * Display a listing of the resource.
      */

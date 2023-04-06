@@ -42,13 +42,6 @@ test('it can create an order', function () {
             'user_id' => $user->id,
         ]));
     });
-    $this->mock(\App\Services\GatewayCustomerService::class, function ($mock) use ($user) {
-        $mock->shouldReceive('getOrCreate')->once()->andReturn(GatewayCustomer::factory()->create([
-            'user_id' => $user->id,
-            'openpay_id' => 'openpay_id',
-            'conekta_id' => 'conekta_id',
-        ]));
-    });
 
     $this->actingAs($user, "web");
     $this->withSession(['cart' => [
@@ -78,13 +71,6 @@ test('it clears the session after placing order', function () {
     $this->mock(OrderService::class, function ($mock) use ($user) {
         $mock->shouldReceive('create')->once()->andReturn(Order::factory()->create([
             'user_id' => $user->id,
-        ]));
-    });
-    $this->mock(\App\Services\GatewayCustomerService::class, function ($mock) use ($user) {
-        $mock->shouldReceive('getOrCreate')->once()->andReturn(GatewayCustomer::factory()->create([
-            'user_id' => $user->id,
-            'openpay_id' => 'openpay_id',
-            'conekta_id' => 'conekta_id',
         ]));
     });
 
@@ -125,4 +111,14 @@ test('it can show the orders list to the owner', function () {
 test('it cannot show an order list to a guest', function () {
     $this->get('/orders')
         ->assertRedirect('/login');
+});
+
+test('it redirects back with error if cart is empty', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, "web");
+    $this->post('/orders', [
+        'payment_method' => 'bank_account',
+    ])->assertRedirect()
+        ->assertSessionHas('error', 'No hay productos en el carrito');
 });

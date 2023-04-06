@@ -2,7 +2,9 @@
 
 use App\Models\Product;
 use App\Models\User;
+use App\Services\OrderService;
 use Inertia\Testing\AssertableInertia as Assert;
+use Stripe\PaymentIntent;
 
 test('it can show cart page', function () {
     $this->get('/cart')
@@ -18,6 +20,29 @@ test('it can show cart page', function () {
 });
 
 test('it can show checkout page', function () {
+    $this->mock(OrderService::class, function ($mock) {
+        $mock->shouldReceive('calculateSubtotal')
+            ->once()
+            ->andReturn(100);
+        $mock->shouldReceive('calculateTax')
+            ->once()
+            ->andReturn(16);
+        $mock->shouldReceive('createStripeIntent')
+            ->once()
+            ->andReturn(new PaymentIntent());
+    });
+
+    // Create cart in session so it won't redirect back
+    session()->put('cart', [
+        1 => [
+            'id' => 1,
+            'name' => 'Test Product',
+            'price' => 100,
+            'image' => 'test.jpg',
+            'quantity' => 1,
+        ],
+    ]);
+
     $this->actingAs(User::factory()->create(), "web");
     $this->get('/checkout')
         ->assertOk()
@@ -28,6 +53,12 @@ test('it can show checkout page', function () {
                 ->has('shipping')
                 ->has('total')
             );
+});
+
+test('it redirects back if cart is empty', function () {
+    $this->actingAs(User::factory()->create(), "web")
+        ->get('/checkout')
+        ->assertRedirect('/');
 });
 
 test('it wont show checkout page if user is not logged in', function () {
