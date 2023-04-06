@@ -14,8 +14,8 @@ defineProps({
 });
 
 const form = useForm({
-    email: '',
-    password: '',
+    email: 'test@example.com',
+    password: 'password',
     remember: false,
 });
 
@@ -57,7 +57,7 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Contraseña" />
                 <TextInput
                     id="password"
                     v-model="form.password"
@@ -72,7 +72,9 @@ const submit = () => {
             <div class="block mt-4">
                 <label class="flex items-center">
                     <Checkbox v-model:checked="form.remember" name="remember" />
-                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        Recuerda mi sesión
+                    </span>
                 </label>
             </div>
 
@@ -82,7 +84,12 @@ const submit = () => {
                 </Link>
 
                 <PrimaryButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
+                    <span v-if="form.processing">
+                        <v-icon name="ri-loader-5-fill" animation="spin" />
+                    </span>
+                    <span v-else>
+                        Iniciar sesión
+                    </span>
                 </PrimaryButton>
             </div>
         </form>

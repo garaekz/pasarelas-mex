@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -43,7 +42,10 @@ const logout = () => {
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('welcome')">
-                                <ApplicationMark class="block h-9 w-auto" />
+                                    <img
+                                    src="https://dagacoding.com/wp-content/uploads/2019/10/Daga_icon_claro-300x105.png"
+                                    alt="Logo"
+                                    class="h-7 w-auto" />
                                 </Link>
                             </div>
 
