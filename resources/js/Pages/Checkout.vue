@@ -12,11 +12,14 @@ const props = defineProps({
     total: 0,
     stripe_key: null,
     stripe_secret: null,
-    errors: () => ({}),
+    errors: {
+        type: Object,
+        default: null,
+    },
 });
 
 const stripeKey = ref(props.stripe_key)
-const errorMessage = ref(props.errors)
+const errorMessage = ref(props.errors ? props.errors.message : null)
 
 const instanceOptions = ref({
     locale: 'es',
@@ -67,8 +70,7 @@ const placeOrder = async () => {
             form.reset();
         },
         onError: (error) => {
-            console.error(error)
-            errorMessage.value = error[0]
+            errorMessage.value = error.message
         },
         onFinish: () => {
             processingStripe.value = false

@@ -90,7 +90,7 @@ class CartController extends Controller
 
             $request->session()->put('cart', $cart);
 
-            return redirect()->route('welcome', ['page' => $request->page]);
+            return redirect()->back();
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
             return redirect()->back()->withErrors(['message' => 'No se pudo agregar el producto al carrito.']);

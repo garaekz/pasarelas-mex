@@ -19,6 +19,7 @@ const handleAddToCart = (productId) => {
     form.product_id = productId;
     form.post(route('cart.add'), {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             form.reset();
         },
