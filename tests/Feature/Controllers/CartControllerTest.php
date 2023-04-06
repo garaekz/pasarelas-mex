@@ -84,6 +84,7 @@ test('it can add product to cart', function () {
                 'price' => $product->price,
                 'image' => $product->image,
                 'quantity' => 1,
+                'total' => 100,
             ],
         ]);
 });
@@ -109,6 +110,7 @@ test('it can update product quantity in cart', function () {
                 'price' => $product->price,
                 'image' => $product->image,
                 'quantity' => 2,
+                'total' => 200,
             ],
         ]);
 });

@@ -25,6 +25,7 @@ class Order extends Model
 
     protected $appends = [
         'payment_method_formatted',
+        'status_formatted',
     ];
 
     protected $dates = [
@@ -55,8 +56,9 @@ class Order extends Model
         return $value;
     }
 
-    public function getStatusAttribute($value)
+    public function getStatusFormattedAttribute()
     {
+        $value = $this->status;
         if ($value == 'pending') {
             return 'Pendiente';
         }

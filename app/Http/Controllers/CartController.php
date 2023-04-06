@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Services\OrderService;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 const SHIPPING_COST = 9.99;
@@ -41,7 +42,7 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (empty($cart)) {
-            return redirect()->back()->withError('Your cart is empty');
+            return redirect()->back()->withErrors(['message' => 'No hay productos en el carrito.']);
         }
 
         $subtotal = $this->orderService->calculateSubtotal($cart);
@@ -51,13 +52,15 @@ class CartController extends Controller
         $shipping = SHIPPING_COST;
         $total = round($subtotal + $tax + $shipping, 2);
 
+        $intent = $this->orderService->createStripeIntent([
+            'amount' => $total * 100,
+            'currency' => 'mxn',
+            'user' => auth()->user(),
+        ]);
+
         return Inertia::render('Checkout', [
             'stripe_key' => env('STRIPE_PK'),
-            'stripe_intent' => $this->orderService->createStripeIntent([
-                'amount' => $total * 100,
-                'currency' => 'mxn',
-                'user' => auth()->user(),
-            ]),
+            'stripe_secret' => $intent->client_secret,
             'subtotal' => round($subtotal, 2),
             'tax' => round($tax, 2),
             'shipping' => $shipping,
@@ -73,21 +76,24 @@ class CartController extends Controller
 
             if (isset($cart[$product->id])) {
                 $cart[$product->id]['quantity']++;
+                $cart[$product->id]['total'] = round($cart[$product->id]['total'] + $product->price, 2);
             } else {
                 $cart[$product->id] = [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'price' => $product->price,
+                    'price' => round($product->price, 2),
                     'image' => $product->image,
                     'quantity' => 1,
+                    'total' => round($product->price, 2),
                 ];
             }
 
             $request->session()->put('cart', $cart);
 
-            return redirect()->route('welcome');
+            return redirect()->route('welcome', ['page' => $request->page]);
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::error($th->getMessage());
+            return redirect()->back()->withErrors(['message' => 'No se pudo agregar el producto al carrito.']);
         }
     }
 

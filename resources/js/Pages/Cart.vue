@@ -28,33 +28,44 @@ const removeFromCart = (id) => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div v-if="$page.props.cartCount" class="flex flex-col sm:flex-row gap-4 items-start">
-                    <div class="w-full sm:w-2/3 bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-8">
-                        <div class="flex flex-col">
-                            <div class="flex flex-col">
-                                <div class="flex flex-row justify-between mb-4">
-                                    <div class="text-gray-500 dark:text-gray-400 font-medium text-lg">Producto</div>
-                                    <span class="text-gray-500 dark:text-gray-400 font-medium text-lg">Cantidad</span>
-                                    <span class="text-gray-500 dark:text-gray-400 font-medium text-lg">Precio</span>
-                                </div>
-                                <div v-for="item in cart" :key="item.id" class="flex flex-row justify-between items-center">
-                                    <div class="flex py-2">
-                                        <div class="w-[110px]">
-                                            <img :src="item.image" class="h-full w-auto">
+                    <div class="w-full sm:w-2/3 bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-8 overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="border-b border-gray-300 dark:border-gray-700">
+                                <tr>
+                                    <th class="text-left text-gray-500 dark:text-gray-400 font-medium text-lg px-2">Producto</th>
+                                    <th class="text-left text-gray-500 dark:text-gray-400 font-medium text-lg px-2">Cantidad</th>
+                                    <th class="text-left text-gray-500 dark:text-gray-400 font-medium text-lg px-2">Precio</th>
+                                    <th class="text-left text-gray-500 dark:text-gray-400 font-medium text-lg" />
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-300 dark:divide-gray-700 text-gray-600 dark:text-gray-400 overflow-y-auto">
+                                <tr v-for="item in cart" :key="item.id">
+                                    <td class="py-2">
+                                        <div class="flex">
+                                            <div class="w-[110px]">
+                                                <img :src="item.image" class="h-full w-auto">
+                                            </div>
+                                            <div class="flex flex-col ml-4">
+                                                <span class="text-gray-800 dark:text-white">{{ item.name }}</span>
+                                                <span class="text-gray-500 dark:text-gray-400">$ {{ item.price }}</span>
+                                            </div>
                                         </div>
-                                        <div class="flex flex-col ml-4">
-                                            <span class="text-gray-800 dark:text-white">{{ item.name }}</span>
-                                            <span class="text-gray-500 dark:text-gray-400">$ {{ item.price }}</span>
-                                        </div>
-                                    </div>
-                                    <span class="text-gray-800 dark:text-white">{{ item.quantity }}</span>
-                                    <span class="text-gray-800 dark:text-white">${{ item.price * item.quantity }}</span>
-                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
-                                        @click="removeFromCart(item.id)">
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="text-gray-800 dark:text-white">{{ item.quantity }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-800 dark:text-white">${{ item.total }}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
+                                            @click="removeFromCart(item.id)">
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="w-full sm:w-1/3 bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-4">
                         <div class="flex flex-col">

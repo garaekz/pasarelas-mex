@@ -120,5 +120,5 @@ test('it redirects back with error if cart is empty', function () {
     $this->post('/orders', [
         'payment_method' => 'bank_account',
     ])->assertRedirect()
-        ->assertSessionHas('error', 'No hay productos en el carrito');
+        ->assertSessionHasErrors(['message' => 'No hay productos en el carrito.']);
 });

@@ -45,10 +45,14 @@ class OrderController extends Controller
             $cart = $request->session()->get('cart');
 
             if (empty($cart)) {
-                return redirect()->back()->withError('No hay productos en el carrito');
+                return redirect()->back()->withErrors(['message' => 'No hay productos en el carrito.']);
             }
 
-            $order = $this->orderService->create($user, $cart, $request->payment_method);
+            if ($request->payment_method === 'card' && !$request->has('payment_intent')) {
+                return redirect()->back()->withErrors(['message' => 'No se ha podido procesar el pago con tarjeta.']);
+            }
+
+            $order = $this->orderService->create($user, $cart, $request->payment_method, $request->payment_intent);
 
             // Clear the cart from session as the order has been created
             $request->session()->forget('cart');
@@ -56,7 +60,7 @@ class OrderController extends Controller
             return redirect()->route('orders.show', $order->public_id);
         } catch (\Throwable $th) {
             Log::error($th);
-            return redirect()->back()->with('error', $th->getMessage());
+            return redirect()->back()->withErrors(['message' => 'Ha ocurrido un error al procesar el pedido.']);
         }
     }
 

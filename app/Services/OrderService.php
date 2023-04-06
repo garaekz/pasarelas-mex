@@ -53,7 +53,7 @@ class OrderService
      * @return Order
      * @throws Exception
      */
-    public function create(User $user, array $cart, string $payment_method): Order
+    public function create(User $user, array $cart, string $payment_method, $payment_intent = null): Order
     {
         try {
             DB::beginTransaction();
@@ -82,14 +82,20 @@ class OrderService
                 'payment_gateway' => $payment_gateway,
             ]);
 
-            // Charge order
-            $payment = $this->charge($order, $user, $cart);
+            if (!$payment_intent) {
+                // Charge order
+                $payment = $this->charge($order, $user, $cart, $payment_intent);
 
-            // Update order with payment info
-            $order->payment_id = $payment->id;
-            if ($payment_method === 'oxxo') {
-                $order->reference = $payment->charges[0]->payment_method->reference;
+                // Update order with payment info
+                $order->payment_id = $payment->id;
+                if ($payment_method === 'oxxo') {
+                    $order->reference = $payment->charges[0]->payment_method->reference;
+                }
+            } else {
+                $order->payment_id = $payment_intent;
+                $order->status = 'paid';
             }
+
             $this->orderRepository->save($order);
 
             // Associate products with order
@@ -145,13 +151,14 @@ class OrderService
     public function charge(
         Order $order,
         User $user,
-        array $cart
+        array $cart,
+        $payment_intent = null
     ): OpenpayCharge | ConektaOrder | StripeCharge {
         $gateway = $order->payment_gateway;
-        $data = $order->toArray();
         $customer = $this->getOrCreateCustomer($user, $gateway);
         switch ($gateway) {
             case 'stripe':
+                // This isn't reacheable because we already paid for the order in the frontend
                 $payment = $this->makeStripeCharge($order, $customer, $cart);
                 break;
             case 'openpay':
@@ -260,7 +267,7 @@ class OrderService
             'amount' => $data['amount'],
             'currency' => env('STORE_CURRENCY', 'MXN'),
             'customer' => $customer_id,
-            'payment_method_types' => ['card'],
+            'automatic_payment_methods' => ['enabled' => true],
         ]);
     }
 

@@ -11,68 +11,70 @@ const props = defineProps({
     tax: 0,
     total: 0,
     stripe_key: null,
+    stripe_secret: null,
+    errors: () => ({}),
 });
 
 const stripeKey = ref(props.stripe_key)
+const errorMessage = ref(props.errors)
+
 const instanceOptions = ref({
     locale: 'es',
 })
 const elementsOptions = ref({
     appearance: {
-        theme: 'stripe',
+        theme: 'night',
     },
+    clientSecret: props.stripe_secret,
     // https://stripe.com/docs/js/elements_object/create#stripe_elements-options
 })
 const cardOptions = ref({
     // https://stripe.com/docs/stripe.js#element-options
-    classes: {
-        empty: 'text-white dark:text-white p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md',
-        base: 'text-white dark:text-white p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md',
-        invalid: 'text-white dark:text-white border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500',
-        complete: 'text-white dark:text-white border-green-300 text-green-900 placeholder-green-300 focus:outline-none focus:ring-green-500 focus:border-green-500',
-    },
-    style: {
-        base: {
-            color: '#fff',
-            fontSize: '16px',
-            '::placeholder': {
-                color: '#aab7c4',
-            },
-        },
-        invalid: {
-            color: '#fa755a',
-            iconColor: '#fa755a',
-        },
-        complete: {
-            color: '#48bb78',
-            iconColor: '#48bb78',
-        },
-    },
-    value: {
-        postalCode: '12345',
-    },
 })
+
 
 const payment_method = ref(null);
 const stripeLoaded = ref(false)
-const payment = ref()
-const elms = ref()
+const payment = ref(null)
+const elms = ref(null)
+const processingStripe = ref(false)
 
 
 const form = useForm({
     payment_method: null,
+    payment_intent: null,
 });
 
-const placeOrder = () => {
+const placeOrder = async () => {
     form.payment_method = payment_method.value;
+    if (payment_method.value == 'card') {
+        processingStripe.value = true
+        const { error, paymentIntent } = await elms.value.instance.confirmPayment({
+            elements: elms.value.elements,
+            redirect: 'if_required',
+        });
+
+        if (error) {
+            errorMessage.value = ['card_error', 'validation_error'].includes(error.type) ? error.message : 'Ocurrió un error al procesar el pago';
+            return;
+        }
+
+        form.payment_intent = paymentIntent.id;
+    }
+
     form.post(route('orders.store'), {
         onSuccess: () => {
             form.reset();
         },
+        onError: (error) => {
+            console.error(error)
+            errorMessage.value = error[0]
+        },
+        onFinish: () => {
+            processingStripe.value = false
+        }
     });
 };
-
-
 
 // Watch for payment_method
 watch(payment_method, (value) => {
@@ -119,6 +121,13 @@ watch(payment_method, (value) => {
                 <div class="flex sm:flex-row flex-col gap-4 items-start mt-4">
                     <div class="w-full sm:w-2/3 bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-8">
                         <div class="flex flex-col">
+                            <!-- Error Message -->
+                            <div v-if="errorMessage" class="bg-red-300 border border-red-400 text-red-900 px-4 py-3 rounded relative flex gap-2 mb-4"
+                                role="alert">
+                                <strong class="font-bold">Error!</strong>
+                                <span class="block sm:inline">{{ errorMessage }}</span>
+                            </div>
+
                             <ul class="flex flex-col w-full gap-4">
                                 <li>
                                     <input type="radio" id="bank_account" name="payment-type" value="bank_account"
@@ -161,10 +170,11 @@ watch(payment_method, (value) => {
                                         <v-icon v-if="payment_method == 'card'" name="bi-check2-circle" scale="2" />
                                         <v-icon v-else name="bi-circle" scale="1.6" />
                                     </label>
-                                    <StripeElements class="mt-8" v-if="stripeLoaded && payment_method === 'card'" v-slot="{ elements, instance }"
-                                        ref="elms" :stripe-key="stripeKey" :instance-options="instanceOptions"
-                                        :elements-options="elementsOptions">
-                                        <StripeElement type="payment" ref="payment" :elements="elements" :options="cardOptions" />
+                                    <StripeElements class="mt-8" v-if="stripeLoaded && payment_method === 'card'"
+                                        v-slot="{ elements }" ref="elms" :stripe-key="stripeKey"
+                                        :instance-options="instanceOptions" :elements-options="elementsOptions">
+                                        <StripeElement type="payment" ref="payment" :elements="elements"
+                                            :options="cardOptions" />
                                     </StripeElements>
                                 </li>
                             </ul>
@@ -198,7 +208,7 @@ watch(payment_method, (value) => {
                                     'bg-blue-500 hover:bg-blue-700': payment_method && !form.processing,
                                     'bg-gray-500 text-gray-200 cursor-not-allowed': !payment_method || form.processing
                                 }" class="flex justify-center text-white font-bold py-2 px-4 rounded w-full">
-                                    <span v-if="form.processing">
+                                    <span v-if="form.processing || processingStripe">
                                         <v-icon name="ri-loader-5-fill" animation="spin" />
                                     </span>
                                     <span v-else>

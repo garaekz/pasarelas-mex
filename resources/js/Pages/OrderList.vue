@@ -42,7 +42,8 @@ const props = defineProps({
                                 Mostrando {{ orders.from }} - {{ orders.to }} de {{ orders.total }} ordenes
                             </span>
 
-                            <table class="w-full mt-4 table-auto border-collapse border border-gray-200 dark:border-gray-700">
+                            <table
+                                class="w-full mt-4 table-auto border-collapse border border-gray-200 dark:border-gray-700">
                                 <thead
                                     class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
                                     <tr class="text-left">
@@ -62,7 +63,17 @@ const props = defineProps({
                                         <td class="px-4 py-2 text-center">
                                             {{ order.products_count }}
                                         </td>
-                                        <td class="px-4 py-2">{{ order.status }}</td>
+                                        <td class="px-4 py-2">
+                                            <span :class="{
+                                                'bg-green-100 dark:bg-green-700 text-green-800 dark:text-green-100': order.status === 'paid',
+                                                'bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-100': order.status === 'pending',
+                                                'bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-blue-100': order.status === 'shipped',
+                                                'bg-yellow-100 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-100': order.status === 'delivered',
+                                                'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100': order.status === 'canceled',
+                                            }" class="px-4 py-1 rounded-full font-semibold">
+                                                {{ order.status_formatted }}
+                                            </span>
+                                        </td>
                                         <td class="px-4 py-2 text-right">${{ order.total }}</td>
                                         <td class="px-4 py-2">
                                             <Link :href="route('orders.show', order.public_id)"
